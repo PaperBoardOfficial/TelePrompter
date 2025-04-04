@@ -99,17 +99,10 @@ export class ProcessingHelper {
 
         if (!result.success) {
           console.log("Processing failed:", result.error)
-          if (result.error?.includes("OpenAI API key not found")) {
-            mainWindow.webContents.send(
-              this.deps.PROCESSING_EVENTS.INITIAL_SOLUTION_ERROR,
-              "OpenAI API key not found in environment variables. Please set the OPEN_AI_API_KEY environment variable."
-            )
-          } else {
-            mainWindow.webContents.send(
-              this.deps.PROCESSING_EVENTS.INITIAL_SOLUTION_ERROR,
-              result.error
-            )
-          }
+          mainWindow.webContents.send(
+            this.deps.PROCESSING_EVENTS.INITIAL_SOLUTION_ERROR,
+            result.error
+          )
           // Reset view back to queue on error
           console.log("Resetting view to queue due to error")
           this.deps.setView("queue")
