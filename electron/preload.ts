@@ -44,6 +44,11 @@ interface ElectronAPI {
   onUpdateAvailable: (callback: (info: any) => void) => () => void
   onUpdateDownloaded: (callback: (info: any) => void) => () => void
   getPlatform: () => string
+  getApiKey: () => Promise<{ success: boolean; apiKey?: string; error?: string }>
+  setApiKey: (apiKey: string) => Promise<{ success: boolean; error?: string }>
+  quitApp: () => Promise<void>
+  getTransparency: () => Promise<{ success: boolean; transparency?: number }>
+  setTransparency: (value: number) => Promise<void>
 }
 
 export const PROCESSING_EVENTS = {
@@ -201,7 +206,12 @@ const electronAPI = {
       ipcRenderer.removeListener("update-downloaded", subscription)
     }
   },
-  getPlatform: () => process.platform
+  getPlatform: () => process.platform,
+  getApiKey: () => ipcRenderer.invoke("get-api-key"),
+  setApiKey: (apiKey: string) => ipcRenderer.invoke("set-api-key", apiKey),
+  quitApp: () => ipcRenderer.invoke("quit-app"),
+  getTransparency: () => ipcRenderer.invoke("get-transparency"),
+  setTransparency: (value: number) => ipcRenderer.invoke("set-transparency", value),
 } as ElectronAPI
 
 // Before exposing the API

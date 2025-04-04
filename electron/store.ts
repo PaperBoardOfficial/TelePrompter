@@ -1,12 +1,16 @@
 import Store from "electron-store"
+import { app } from 'electron'
 
 interface StoreSchema {
-  // Empty for now, we can add other store items here later
+  apiKey?: string;
+  transparency?: number;
 }
 
 const store = new Store<StoreSchema>({
-  defaults: {},
-  encryptionKey: "your-encryption-key"
+  defaults: {
+    transparency: 80
+  },
+  clearInvalidConfig: true
 }) as Store<StoreSchema> & {
   store: StoreSchema
   get: <K extends keyof StoreSchema>(key: K) => StoreSchema[K]

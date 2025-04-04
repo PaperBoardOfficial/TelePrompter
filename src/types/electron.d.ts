@@ -46,6 +46,11 @@ export interface ElectronAPI {
   onUpdateDownloaded: (callback: (info: any) => void) => () => void
   openSettingsPortal: () => Promise<void>
   getPlatform: () => string
+  getApiKey: () => Promise<{ success: boolean; apiKey?: string; error?: string }>
+  setApiKey: (apiKey: string) => Promise<{ success: boolean; error?: string }>
+  quitApp: () => Promise<{ success: boolean; error?: string }>
+  getTransparency: () => Promise<{ success: boolean; transparency?: number; error?: string }>
+  setTransparency: (value: number) => Promise<{ success: boolean; error?: string }>
 }
 
 declare global {

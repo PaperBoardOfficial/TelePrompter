@@ -6,6 +6,7 @@ import { ScreenshotHelper } from "./ScreenshotHelper"
 import { ShortcutsHelper } from "./shortcuts"
 import { initAutoUpdater } from "./autoUpdater"
 import * as dotenv from "dotenv"
+import { store } from './store'
 
 // Constants
 const isDev = process.env.NODE_ENV === "development" || !app.isPackaged
@@ -186,7 +187,7 @@ async function createWindow(): Promise<void> {
     transparent: true,
     fullscreenable: false,
     hasShadow: false,
-    backgroundColor: "#00000000",
+    backgroundColor: '#00000000',
     focusable: true,
     skipTaskbar: true,
     type: "panel",
@@ -271,6 +272,10 @@ async function createWindow(): Promise<void> {
   state.currentX = bounds.x
   state.currentY = bounds.y
   state.isWindowVisible = true
+
+  // Apply saved transparency if available
+  const savedTransparency = store.get('transparency') ?? 80; // Default to 80% if not set
+  state.mainWindow.setOpacity(savedTransparency / 100);
 }
 
 function handleWindowMove(): void {

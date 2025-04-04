@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react"
 import { useToast } from "../../contexts/toast"
 import { LanguageSelector } from "../shared/LanguageSelector"
 import { COMMAND_KEY } from "../../utils/platform"
+import SettingsModal from '../Settings/SettingsModal'
 
 interface QueueCommandsProps {
   onTooltipVisibilityChange: (visible: boolean, height: number) => void
@@ -20,6 +21,8 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
   const [isTooltipVisible, setIsTooltipVisible] = useState(false)
   const tooltipRef = useRef<HTMLDivElement>(null)
   const { showToast } = useToast()
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [transparency, setTransparency] = useState(80) // Default 80% opacity (20% transparency)
 
   useEffect(() => {
     let tooltipHeight = 0
@@ -28,6 +31,48 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
     }
     onTooltipVisibilityChange(isTooltipVisible, tooltipHeight)
   }, [isTooltipVisible])
+
+  // Load transparency value on component mount
+  useEffect(() => {
+    const loadTransparency = async () => {
+      try {
+        const result = await window.electronAPI.getTransparency()
+        if (result.success && result.transparency !== undefined) {
+          setTransparency(result.transparency)
+        }
+      } catch (error) {
+        console.error("Error loading transparency:", error)
+      }
+    }
+
+    loadTransparency()
+  }, [])
+
+  // Apply transparency when the value changes
+  const handleTransparencyChange = async (value: number) => {
+    setTransparency(value)
+    try {
+      const result = await window.electronAPI.setTransparency(value)
+      if (!result.success) {
+        console.error("Failed to set transparency:", result.error)
+        showToast("Error", "Failed to set transparency", "error")
+      }
+    } catch (error) {
+      console.error("Error setting transparency:", error)
+      showToast("Error", "Failed to set transparency", "error")
+    }
+  }
+
+  // Calculate background opacity styles based on transparency value
+  const getBackgroundStyle = (baseOpacity: number) => {
+    // Scale the opacity based on the transparency slider
+    // For example, if baseOpacity is 0.6 and transparency is 50%, 
+    // the result will be 0.3 (50% of 0.6)
+    const scaledOpacity = baseOpacity * (transparency / 100)
+    return {
+      backgroundColor: `rgba(0, 0, 0, ${scaledOpacity})`
+    }
+  }
 
   const handleMouseEnter = () => {
     setIsTooltipVisible(true)
@@ -38,9 +83,12 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
   }
 
   return (
-    <div>
-      <div className="pt-2 w-fit">
-        <div className="text-xs text-white/90 backdrop-blur-md bg-black/60 rounded-lg py-2 px-4 flex items-center justify-center gap-4">
+    <div className="flex items-center justify-between px-4 py-2 border-b border-white/10">
+      <div className="flex items-center">
+        <div
+          className="text-xs text-white/90 backdrop-blur-md rounded-lg py-2 px-4 flex items-center justify-center gap-4"
+          style={getBackgroundStyle(0.6)} // Replace bg-black/60 with dynamic style
+        >
           {/* Screenshot */}
           <div
             className="flex items-center gap-2 cursor-pointer rounded px-2 py-1.5 hover:bg-white/10 transition-colors"
@@ -61,8 +109,8 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
               {screenshotCount === 0
                 ? "Take first screenshot"
                 : screenshotCount === 1
-                ? "Take second screenshot"
-                : "Reset first screenshot"}
+                  ? "Take second screenshot"
+                  : "Reset first screenshot"}
             </span>
             <div className="flex gap-1">
               <button className="bg-white/10 rounded-md px-1.5 py-1 text-[11px] leading-none text-white/70">
@@ -144,7 +192,10 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
               >
                 {/* Add transparent bridge */}
                 <div className="absolute -top-2 right-0 w-full h-2" />
-                <div className="p-3 text-xs bg-black/80 backdrop-blur-md rounded-lg border border-white/10 text-white/90 shadow-lg">
+                <div
+                  className="p-3 text-xs backdrop-blur-md rounded-lg border border-white/10 text-white/90 shadow-lg"
+                  style={getBackgroundStyle(0.8)} // Replace bg-black/80 with dynamic style
+                >
                   <div className="space-y-4">
                     <h3 className="font-medium truncate">Keyboard Shortcuts</h3>
                     <div className="space-y-3">
@@ -238,11 +289,10 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
 
                       {/* Solve Command */}
                       <div
-                        className={`cursor-pointer rounded px-2 py-1.5 hover:bg-white/10 transition-colors ${
-                          screenshotCount > 0
-                            ? ""
-                            : "opacity-50 cursor-not-allowed"
-                        }`}
+                        className={`cursor-pointer rounded px-2 py-1.5 hover:bg-white/10 transition-colors ${screenshotCount > 0
+                          ? ""
+                          : "opacity-50 cursor-not-allowed"
+                          }`}
                         onClick={async () => {
                           if (screenshotCount === 0) return
 
@@ -290,6 +340,66 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
                             : "Take a screenshot first to generate a solution."}
                         </p>
                       </div>
+
+                      {/* Transparency Slider */}
+                      <div className="rounded px-2 py-1.5">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="truncate">App Transparency</span>
+                          <span
+                            className="text-[10px] px-1.5 py-0.5 rounded leading-none"
+                            style={getBackgroundStyle(0.2)} // Replace bg-white/20 with dynamic style
+                          >
+                            {transparency}%
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min="20"
+                          max="100"
+                          value={transparency}
+                          onChange={(e) => handleTransparencyChange(parseInt(e.target.value))}
+                          className="w-full h-1.5 rounded-lg appearance-none cursor-pointer"
+                          style={{
+                            backgroundColor: `rgba(255, 255, 255, ${0.2 * transparency / 100})`,
+                          }}
+                        />
+                        <p className="text-[10px] leading-relaxed text-white/70 truncate mt-1">
+                          Adjust the transparency of the application window.
+                        </p>
+                      </div>
+
+                      {/* API Settings Option */}
+                      <div
+                        className="cursor-pointer rounded px-2 py-1.5 hover:bg-white/10 transition-colors"
+                        onClick={() => setIsSettingsOpen(true)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="truncate">API Settings</span>
+                        </div>
+                        <p className="text-[10px] leading-relaxed text-white/70 truncate mt-1">
+                          Configure your Gemini API key.
+                        </p>
+                      </div>
+
+                      {/* Quit App Option */}
+                      <div
+                        className="cursor-pointer rounded px-2 py-1.5 hover:bg-white/10 transition-colors"
+                        onClick={async () => {
+                          try {
+                            await window.electronAPI.quitApp();
+                          } catch (error) {
+                            console.error("Error quitting app:", error);
+                            showToast("Error", "Failed to quit application", "error");
+                          }
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="truncate">Quit Application</span>
+                        </div>
+                        <p className="text-[10px] leading-relaxed text-white/70 truncate mt-1">
+                          Close the application completely.
+                        </p>
+                      </div>
                     </div>
 
                     {/* Language Selector only */}
@@ -306,6 +416,13 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Settings modal */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        transparency={transparency} // Pass transparency to the modal
+      />
     </div>
   )
 }

@@ -1,5 +1,6 @@
 // Import necessary modules
 import { GoogleGenerativeAI } from "@google/generative-ai"
+import { store } from "../store"
 
 // Define interfaces for ProblemInfo and related structures
 
@@ -37,16 +38,11 @@ interface ProblemInfo {
   test_cases?: any // Adjust the type as needed
 }
 
-interface StoreSchema {
-  openaiApiKey: string
-  // add other store fields here
-}
-
 // Initialize the Google Generative AI client
 function getGeminiClient() {
-  const apiKey = "AIzaSyCUt56DxwJRCK8UmF6X5H0gEEkkOXRl_YQ"
+  const apiKey = store.get('apiKey')
   if (!apiKey) {
-    throw new Error("Gemini API key not set")
+    throw new Error("Gemini API key not set. Please add your API key in settings.")
   }
   return new GoogleGenerativeAI(apiKey)
 }
@@ -371,9 +367,9 @@ Format Requirements:
 
       throw new Error("Failed to parse Gemini response as JSON")
     }
-  } catch (error: any) {
-    console.error("Error details:", error)
-    throw new Error(`Error generating solutions: ${error.message}`)
+  } catch (error) {
+    console.error("Error calling Gemini API:", error)
+    throw error
   }
 }
 

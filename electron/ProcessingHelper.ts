@@ -427,7 +427,7 @@ export class ProcessingHelper {
           error: "Operation timed out after 1 minute. Please try again."
         }
       }
-      
+
       if (
         error.response?.data?.error?.includes(
           "Please close this window and re-enter a valid Open AI API key."

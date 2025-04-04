@@ -1,7 +1,8 @@
 // ipcHandlers.ts
 
-import { ipcMain, shell } from "electron"
+import { ipcMain, shell, app, BrowserWindow } from "electron"
 import { IIpcHandlerDeps } from "./main"
+import { store } from './store'
 
 export function initializeIpcHandlers(deps: IIpcHandlerDeps): void {
   console.log("Initializing IPC handlers")
@@ -222,4 +223,83 @@ export function initializeIpcHandlers(deps: IIpcHandlerDeps): void {
       return { error: "Failed to move window down" }
     }
   })
+
+  // Get API key
+  ipcMain.handle("get-api-key", async () => {
+    try {
+      return {
+        success: true,
+        apiKey: store.get('apiKey') || ""
+      };
+    } catch (error) {
+      console.error("Error getting API key:", error);
+      return {
+        success: false,
+        error: (error as Error).message
+      };
+    }
+  });
+
+  // Set API key
+  ipcMain.handle("set-api-key", async (_event, apiKey: string) => {
+    try {
+      store.set('apiKey', apiKey);
+      return { success: true };
+    } catch (error) {
+      console.error("Error setting API key:", error);
+      return {
+        success: false,
+        error: (error as Error).message
+      };
+    }
+  });
+
+  // Quit app
+  ipcMain.handle("quit-app", async () => {
+    try {
+      app.quit();
+      return { success: true };
+    } catch (error) {
+      console.error("Error quitting app:", error);
+      return {
+        success: false,
+        error: (error as Error).message
+      };
+    }
+  });
+
+  // Get transparency
+  ipcMain.handle("get-transparency", async () => {
+    try {
+      const transparency = store.get('transparency');
+      return { success: true, transparency };
+    } catch (error) {
+      console.error("Error getting transparency:", error);
+      return {
+        success: false,
+        error: (error as Error).message
+      };
+    }
+  });
+
+  // Set transparency
+  ipcMain.handle("set-transparency", async (_event, value: number) => {
+    try {
+      store.set('transparency', value);
+
+      const mainWindow = deps.getMainWindow();
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        const opacity = value / 100;
+        mainWindow.setOpacity(opacity);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error("Error setting transparency:", error);
+      return {
+        success: false,
+        error: (error as Error).message
+      };
+    }
+  });
 }
