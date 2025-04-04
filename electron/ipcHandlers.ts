@@ -1,33 +1,10 @@
 // ipcHandlers.ts
 
 import { ipcMain, shell } from "electron"
-import { randomBytes } from "crypto"
 import { IIpcHandlerDeps } from "./main"
 
 export function initializeIpcHandlers(deps: IIpcHandlerDeps): void {
   console.log("Initializing IPC handlers")
-
-  // Credits handlers
-  ipcMain.handle("set-initial-credits", async (_event, credits: number) => {
-    const mainWindow = deps.getMainWindow()
-    if (!mainWindow) return
-
-    try {
-      // Set the credits in a way that ensures atomicity
-      await mainWindow.webContents.executeJavaScript(
-        `window.__CREDITS__ = ${credits}`
-      )
-      mainWindow.webContents.send("credits-updated", credits)
-    } catch (error) {
-      console.error("Error setting initial credits:", error)
-      throw error
-    }
-  })
-
-  ipcMain.handle("decrement-credits", async () => {
-    // No need to decrement credits since we're bypassing the credit system
-    return
-  })
 
   // Screenshot queue handlers
   ipcMain.handle("get-screenshot-queue", () => {

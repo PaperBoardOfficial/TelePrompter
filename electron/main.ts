@@ -1,4 +1,4 @@
-import { app, BrowserWindow, screen, shell, ipcMain } from "electron"
+import { app, BrowserWindow, screen, shell } from "electron"
 import path from "path"
 import { initializeIpcHandlers } from "./ipcHandlers"
 import { ProcessingHelper } from "./ProcessingHelper"
@@ -37,7 +37,6 @@ const state = {
   PROCESSING_EVENTS: {
     UNAUTHORIZED: "processing-unauthorized",
     NO_SCREENSHOTS: "processing-no-screenshots",
-    OUT_OF_CREDITS: "out-of-credits",
     API_KEY_INVALID: "processing-api-key-invalid",
     INITIAL_START: "initial-start",
     PROBLEM_EXTRACTED: "problem-extracted",
@@ -399,7 +398,6 @@ function loadEnvVariables() {
     dotenv.config()
     console.log("Environment variables loaded:", {
       NODE_ENV: process.env.NODE_ENV,
-      // Remove Supabase references
       OPEN_AI_API_KEY: process.env.OPEN_AI_API_KEY ? "exists" : "missing"
     })
   } catch (error) {

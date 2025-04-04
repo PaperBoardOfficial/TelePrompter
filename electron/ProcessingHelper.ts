@@ -3,13 +3,12 @@ import fs from "node:fs"
 import { ScreenshotHelper } from "./ScreenshotHelper"
 import { IProcessingHelperDeps } from "./main"
 import axios from "axios"
-import { app } from "electron"
 import { BrowserWindow } from "electron"
-
-const isDev = !app.isPackaged
-const API_BASE_URL = isDev
-  ? "http://localhost:3000"
-  : "https://www.interviewcoder.co"
+import {
+  debugSolutionResponses,
+  extractProblemInfo,
+  generateSolutionResponses
+} from "./handlers/problemHandler"
 
 export class ProcessingHelper {
   private deps: IProcessingHelperDeps
@@ -39,11 +38,6 @@ export class ProcessingHelper {
       attempts++
     }
     throw new Error("App failed to initialize after 5 seconds")
-  }
-
-  private async getCredits(): Promise<number> {
-    // Always return a high number of credits
-    return 999
   }
 
   private async getLanguage(): Promise<string> {
@@ -76,8 +70,6 @@ export class ProcessingHelper {
     const mainWindow = this.deps.getMainWindow()
     if (!mainWindow) return
 
-    // Credits check is bypassed - we always have enough credits
-    
     const view = this.deps.getView()
     console.log("Processing screenshots in view:", view)
 
@@ -107,11 +99,7 @@ export class ProcessingHelper {
 
         if (!result.success) {
           console.log("Processing failed:", result.error)
-          if (result.error?.includes("API Key out of credits")) {
-            mainWindow.webContents.send(
-              this.deps.PROCESSING_EVENTS.OUT_OF_CREDITS
-            )
-          } else if (result.error?.includes("OpenAI API key not found")) {
+          if (result.error?.includes("OpenAI API key not found")) {
             mainWindow.webContents.send(
               this.deps.PROCESSING_EVENTS.INITIAL_SOLUTION_ERROR,
               "OpenAI API key not found in environment variables. Please set the OPEN_AI_API_KEY environment variable."
@@ -240,23 +228,7 @@ export class ProcessingHelper {
 
         // First API call - extract problem info
         try {
-          const extractResponse = await axios.post(
-            `${API_BASE_URL}/api/extract`,
-            { imageDataList, language },
-            {
-              signal,
-              timeout: 300000,
-              validateStatus: function (status) {
-                return status < 500
-              },
-              maxRedirects: 5,
-              headers: {
-                "Content-Type": "application/json"
-              }
-            }
-          )
-
-          problemInfo = extractResponse.data
+          problemInfo = await extractProblemInfo(imageDataList)
 
           // Store problem info in AppState
           this.deps.setProblemInfo(problemInfo)
@@ -310,9 +282,6 @@ export class ProcessingHelper {
                 "Operation timed out after 1 minute. Please try again."
               )
             }
-            if (error.response.data.error.includes("API Key out of credits")) {
-              throw new Error(error.response.data.error)
-            }
             throw new Error(error.response.data.error)
           }
 
@@ -354,23 +323,13 @@ export class ProcessingHelper {
         throw new Error("No problem info available")
       }
 
-      const response = await axios.post(
-        `${API_BASE_URL}/api/generate`,
-        { ...problemInfo, language },
-        {
-          signal,
-          timeout: 300000,
-          validateStatus: function (status) {
-            return status < 500
-          },
-          maxRedirects: 5,
-          headers: {
-            "Content-Type": "application/json"
-          }
-        }
-      )
+      const solutions = await generateSolutionResponses(problemInfo)
 
-      return { success: true, data: response.data }
+      if (!solutions) {
+        throw new Error("No solutions received")
+      }
+
+      return { success: true, data: solutions }
     } catch (error: any) {
       const mainWindow = this.deps.getMainWindow()
 
@@ -394,15 +353,6 @@ export class ProcessingHelper {
           success: false,
           error: "Request timed out. Please try again."
         }
-      }
-
-      if (error.response?.data?.error?.includes("API Key out of credits")) {
-        if (mainWindow) {
-          mainWindow.webContents.send(
-            this.deps.PROCESSING_EVENTS.OUT_OF_CREDITS
-          )
-        }
-        return { success: false, error: error.response.data.error }
       }
 
       if (
@@ -435,23 +385,17 @@ export class ProcessingHelper {
         throw new Error("No problem info available")
       }
 
-      const response = await axios.post(
-        `${API_BASE_URL}/api/debug`,
-        { imageDataList, problemInfo, language },
-        {
-          signal,
-          timeout: 300000,
-          validateStatus: function (status) {
-            return status < 500
-          },
-          maxRedirects: 5,
-          headers: {
-            "Content-Type": "application/json"
-          }
-        }
+      const debugSolutions = await debugSolutionResponses(
+        imageDataList,
+        problemInfo
       )
 
-      return { success: true, data: response.data }
+      if (!debugSolutions) {
+        throw new Error("No debug solutions received")
+      }
+
+
+      return { success: true, data: debugSolutions }
     } catch (error: any) {
       const mainWindow = this.deps.getMainWindow()
 
@@ -483,16 +427,7 @@ export class ProcessingHelper {
           error: "Operation timed out after 1 minute. Please try again."
         }
       }
-
-      if (error.response?.data?.error?.includes("API Key out of credits")) {
-        if (mainWindow) {
-          mainWindow.webContents.send(
-            this.deps.PROCESSING_EVENTS.OUT_OF_CREDITS
-          )
-        }
-        return { success: false, error: error.response.data.error }
-      }
-
+      
       if (
         error.response?.data?.error?.includes(
           "Please close this window and re-enter a valid Open AI API key."
@@ -543,7 +478,7 @@ export class ProcessingHelper {
       this.currentProcessingAbortController.abort();
       this.currentProcessingAbortController = null;
     }
-    
+
     if (this.currentExtraProcessingAbortController) {
       this.currentExtraProcessingAbortController.abort();
       this.currentExtraProcessingAbortController = null;

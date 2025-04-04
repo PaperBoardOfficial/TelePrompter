@@ -216,7 +216,6 @@ const Debug: React.FC<DebugProps> = ({
         onTooltipVisibilityChange={handleTooltipVisibilityChange}
         isProcessing={isProcessing}
         extraScreenshots={screenshots}
-        credits={window.__CREDITS__}
         currentLanguage={currentLanguage}
         setLanguage={setLanguage}
       />

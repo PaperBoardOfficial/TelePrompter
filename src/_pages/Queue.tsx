@@ -18,14 +18,12 @@ async function fetchScreenshots(): Promise<Screenshot[]> {
 
 interface QueueProps {
   setView: (view: "queue" | "solutions" | "debug") => void
-  credits: number
   currentLanguage: string
   setLanguage: (language: string) => void
 }
 
 const Queue: React.FC<QueueProps> = ({
   setView,
-  credits,
   currentLanguage,
   setLanguage
 }) => {
@@ -109,13 +107,6 @@ const Queue: React.FC<QueueProps> = ({
           "There are no screenshots to process.",
           "neutral"
         )
-      }),
-      window.electronAPI.onOutOfCredits(() => {
-        showToast(
-          "Out of Credits",
-          "You are out of credits. Please refill at https://www.interviewcoder.co/settings.",
-          "error"
-        )
       })
     ]
 
@@ -143,7 +134,6 @@ const Queue: React.FC<QueueProps> = ({
           <QueueCommands
             onTooltipVisibilityChange={handleTooltipVisibilityChange}
             screenshotCount={screenshots.length}
-            credits={credits}
             currentLanguage={currentLanguage}
             setLanguage={setLanguage}
           />

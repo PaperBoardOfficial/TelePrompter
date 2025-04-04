@@ -11,7 +11,6 @@ interface ImportMeta {
 
 // Extend the Window interface
 interface Window {
-  __CREDITS__: number
   __LANGUAGE__: string
   __IS_INITIALIZED__: boolean
   electronAPI: {
@@ -54,9 +53,6 @@ interface Window {
     startUpdate: () => Promise<{ success: boolean; error?: string }>
     installUpdate: () => void
     onUpdateAvailable: (callback: (info: any) => void) => () => void
-    decrementCredits: () => Promise<void>
-    onCreditsUpdated: (callback: (credits: number) => void) => () => void
-    onOutOfCredits: (callback: () => void) => () => void
     getPlatform: () => string
   }
   electron?: {

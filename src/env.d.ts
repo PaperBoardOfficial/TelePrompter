@@ -69,7 +69,6 @@ interface Window {
       removeListener(channel: string, func: (...args: any[]) => void): void
     }
   }
-  __CREDITS__: number
   __LANGUAGE__: string
   __IS_INITIALIZED__: boolean
 }

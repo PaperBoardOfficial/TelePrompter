@@ -2,7 +2,6 @@ import SubscribedApp from "./_pages/SubscribedApp"
 import {
   QueryClient,
   QueryClientProvider,
-  useQueryClient
 } from "@tanstack/react-query"
 import { useEffect, useState, useCallback } from "react"
 import {
@@ -37,15 +36,9 @@ function App() {
     description: "",
     variant: "neutral" as const
   })
-  const [credits, setCredits] = useState<number>(999) // Set a high default value
   const [currentLanguage, setCurrentLanguage] = useState<string>("python")
   const [isInitialized, setIsInitialized] = useState(false)
 
-  // Helper function to safely update credits
-  const updateCredits = useCallback((newCredits: number) => {
-    setCredits(newCredits)
-    window.__CREDITS__ = newCredits
-  }, [])
 
   // Helper function to safely update language
   const updateLanguage = useCallback((newLanguage: string) => {
@@ -79,10 +72,9 @@ function App() {
   // Initialize app with default values
   useEffect(() => {
     // Set default values
-    updateCredits(999) // High number of credits
     updateLanguage("python")
     markInitialized()
-  }, [updateCredits, updateLanguage, markInitialized])
+  }, [updateLanguage, markInitialized])
 
   // Close toast after delay
   useEffect(() => {
@@ -101,7 +93,6 @@ function App() {
         <ToastProvider>
           <div className="min-h-screen bg-transparent">
             <SubscribedApp
-              credits={credits}
               currentLanguage={currentLanguage}
               setLanguage={updateLanguage}
             />

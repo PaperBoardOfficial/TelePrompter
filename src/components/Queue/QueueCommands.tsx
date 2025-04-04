@@ -7,7 +7,6 @@ import { COMMAND_KEY } from "../../utils/platform"
 interface QueueCommandsProps {
   onTooltipVisibilityChange: (visible: boolean, height: number) => void
   screenshotCount?: number
-  credits: number
   currentLanguage: string
   setLanguage: (language: string) => void
 }
@@ -15,7 +14,6 @@ interface QueueCommandsProps {
 const QueueCommands: React.FC<QueueCommandsProps> = ({
   onTooltipVisibilityChange,
   screenshotCount = 0,
-  credits,
   currentLanguage,
   setLanguage
 }) => {
@@ -79,19 +77,8 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
           {/* Solve Command */}
           {screenshotCount > 0 && (
             <div
-              className={`flex flex-col cursor-pointer rounded px-2 py-1.5 hover:bg-white/10 transition-colors ${
-                credits <= 0 ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className="flex flex-col cursor-pointer rounded px-2 py-1.5 hover:bg-white/10 transition-colors"
               onClick={async () => {
-                if (credits <= 0) {
-                  showToast(
-                    "Out of Credits",
-                    "You are out of credits. Please refill at https://www.interviewcoder.co/settings.",
-                    "error"
-                  )
-                  return
-                }
-
                 try {
                   const result =
                     await window.electronAPI.triggerProcessScreenshots()

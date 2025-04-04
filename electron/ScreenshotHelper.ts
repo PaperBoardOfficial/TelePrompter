@@ -93,6 +93,15 @@ export class ScreenshotHelper {
     return buffer
   }
 
+  private async captureScreenshotLinux(): Promise<Buffer> {
+    const tmpPath = path.join(app.getPath("temp"), `${uuidv4()}.png`)
+    // Use gnome-screenshot for Ubuntu/Linux systems
+    await execFileAsync("gnome-screenshot", ["-f", tmpPath])
+    const buffer = await fs.promises.readFile(tmpPath)
+    await fs.promises.unlink(tmpPath)
+    return buffer
+  }
+
   private async captureScreenshotWindows(): Promise<Buffer> {
     // Using PowerShell's native screenshot capability
     const tmpPath = path.join(app.getPath("temp"), `${uuidv4()}.png`)
@@ -124,10 +133,14 @@ export class ScreenshotHelper {
     let screenshotPath = ""
     try {
       // Get screenshot buffer using native methods
-      const screenshotBuffer =
-        process.platform === "darwin"
-          ? await this.captureScreenshotMac()
-          : await this.captureScreenshotWindows()
+      let screenshotBuffer: Buffer;
+      if (process.platform === "darwin") {
+        screenshotBuffer = await this.captureScreenshotMac();
+      } else if (process.platform === "linux") {
+        screenshotBuffer = await this.captureScreenshotLinux();
+      } else {
+        screenshotBuffer = await this.captureScreenshotWindows();
+      }
 
       // Save and manage the screenshot based on current view
       if (this.view === "queue") {
