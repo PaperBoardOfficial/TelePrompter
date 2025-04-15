@@ -1,14 +1,19 @@
 // ProcessingHelper.ts
 import fs from "node:fs"
-import { ScreenshotHelper } from "./ScreenshotHelper"
+import { ScreenshotHelper } from "./screenshotHelper"
 import { IProcessingHelperDeps } from "./main"
 import axios from "axios"
 import { BrowserWindow } from "electron"
 import {
-  debugSolutionResponses,
-  extractProblemInfo,
-  generateSolutionResponses
-} from "./handlers/problemHandler"
+  processWithInitialPrompt,
+  processWithFollowUpPrompt
+} from "./problemHandler"
+
+const MAX_API_RETRIES = 3;
+const API_RETRY_DELAY = 1000; // 1 second
+
+// Helper function for delay
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export class ProcessingHelper {
   private deps: IProcessingHelperDeps
@@ -209,55 +214,62 @@ export class ProcessingHelper {
     screenshots: Array<{ path: string; data: string }>,
     signal: AbortSignal
   ) {
-    const MAX_RETRIES = 0
-    let retryCount = 0
+    const MAX_RETRIES = MAX_API_RETRIES;
+    let retryCount = 0;
 
     while (retryCount <= MAX_RETRIES) {
       try {
-        const imageDataList = screenshots.map((screenshot) => screenshot.data)
-        const mainWindow = this.deps.getMainWindow()
-        const language = await this.getLanguage()
-        let problemInfo
+        const imageDataList = screenshots.map((screenshot) => screenshot.data);
+        const mainWindow = this.deps.getMainWindow();
 
-        // First API call - extract problem info
+        // First API call - process with initial prompt
         try {
-          problemInfo = await extractProblemInfo(imageDataList)
+          // Add retry logic here
+          let apiError = null;
+          let result = null;
+
+          for (let apiRetry = 0; apiRetry <= MAX_API_RETRIES; apiRetry++) {
+            try {
+              result = await processWithInitialPrompt(imageDataList);
+              apiError = null;
+              break; // Success, exit retry loop
+            } catch (err: any) {
+              apiError = err;
+              console.log(`API attempt ${apiRetry + 1}/${MAX_API_RETRIES + 1} failed:`, err.message);
+
+              // Check if we should retry
+              if (apiRetry < MAX_API_RETRIES && !signal.aborted) {
+                await delay(API_RETRY_DELAY);
+                continue;
+              }
+              throw err; // Re-throw if all retries failed
+            }
+          }
+
+          if (!result) {
+            throw apiError || new Error("Failed to get result from API");
+          }
 
           // Store problem info in AppState
-          this.deps.setProblemInfo(problemInfo)
+          this.deps.setProblemInfo(result);
 
-          // Send first success event
+          // Send success events
           if (mainWindow) {
             mainWindow.webContents.send(
               this.deps.PROCESSING_EVENTS.PROBLEM_EXTRACTED,
-              problemInfo
-            )
+              result
+            );
 
-            // Generate solutions after successful extraction
-            const solutionsResult = await this.generateSolutionsHelper(signal)
-            if (solutionsResult.success) {
-              // Clear any existing extra screenshots before transitioning to solutions view
-              this.screenshotHelper.clearExtraScreenshotQueue()
-              mainWindow.webContents.send(
-                this.deps.PROCESSING_EVENTS.SOLUTION_SUCCESS,
-                solutionsResult.data
-              )
-              return { success: true, data: solutionsResult.data }
-            } else {
-              throw new Error(
-                solutionsResult.error || "Failed to generate solutions"
-              )
-            }
+            // Clear any existing extra screenshots before transitioning to solutions view
+            this.screenshotHelper.clearExtraScreenshotQueue();
+            mainWindow.webContents.send(
+              this.deps.PROCESSING_EVENTS.SOLUTION_SUCCESS,
+              result
+            );
+            return { success: true, data: result };
           }
         } catch (error: any) {
-          // If the request was cancelled, don't retry
-          if (axios.isCancel(error)) {
-            return {
-              success: false,
-              error: "Processing was canceled by the user."
-            }
-          }
-
+          // Handle errors...
           console.error("API Error Details:", {
             status: error.response?.status,
             data: error.response?.data,
@@ -310,19 +322,14 @@ export class ProcessingHelper {
   private async generateSolutionsHelper(signal: AbortSignal) {
     try {
       const problemInfo = this.deps.getProblemInfo()
-      const language = await this.getLanguage()
 
       if (!problemInfo) {
         throw new Error("No problem info available")
       }
 
-      const solutions = await generateSolutionResponses(problemInfo)
-
-      if (!solutions) {
-        throw new Error("No solutions received")
-      }
-
-      return { success: true, data: solutions }
+      // Since we're using the same prompt for both extraction and solution,
+      // we can just return the problem info directly
+      return { success: true, data: problemInfo }
     } catch (error: any) {
       const mainWindow = this.deps.getMainWindow()
 
@@ -371,24 +378,23 @@ export class ProcessingHelper {
   ) {
     try {
       const imageDataList = screenshots.map((screenshot) => screenshot.data)
-      const problemInfo = this.deps.getProblemInfo()
-      const language = await this.getLanguage()
+      const previousResult = this.deps.getProblemInfo()
 
-      if (!problemInfo) {
-        throw new Error("No problem info available")
+      if (!previousResult) {
+        throw new Error("No previous result available")
       }
 
-      const debugSolutions = await debugSolutionResponses(
+      // Process with follow-up prompt
+      const result = await processWithFollowUpPrompt(
         imageDataList,
-        problemInfo
+        previousResult
       )
 
-      if (!debugSolutions) {
-        throw new Error("No debug solutions received")
+      if (!result) {
+        throw new Error("No result received")
       }
 
-
-      return { success: true, data: debugSolutions }
+      return { success: true, data: result }
     } catch (error: any) {
       const mainWindow = this.deps.getMainWindow()
 

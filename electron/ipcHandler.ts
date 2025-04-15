@@ -302,4 +302,140 @@ export function initializeIpcHandlers(deps: IIpcHandlerDeps): void {
       };
     }
   });
+
+  // Add new IPC handlers for prompt templates
+  ipcMain.handle('get-prompt-templates', async () => {
+    try {
+      const templates = store.get('promptTemplates');
+      const activeTemplate = store.get('activeTemplate');
+
+      return {
+        success: true,
+        templates,
+        activeTemplate
+      };
+    } catch (error) {
+      console.error('Error getting prompt templates:', error);
+      return {
+        success: false,
+        error: 'Failed to get prompt templates'
+      };
+    }
+  });
+
+  ipcMain.handle('save-prompt-templates', async (_, { templates, activeTemplate }) => {
+    try {
+      store.set('promptTemplates', templates);
+      store.set('activeTemplate', activeTemplate);
+
+      return {
+        success: true
+      };
+    } catch (error) {
+      console.error('Error saving prompt templates:', error);
+      return {
+        success: false,
+        error: 'Failed to save prompt templates'
+      };
+    }
+  });
+
+  ipcMain.handle('reset-prompt-templates', async () => {
+    try {
+      const templates = {
+        coding_task: {
+          name: "Coding Task",
+          initialPrompt: `Analyze the image and extract all relevant information about this programming task.
+
+Main Task:
+[problem_statement]
+
+Input Specifications:
+[input_format_description]
+Parameters:
+[input_format.parameters]
+
+Output Specifications:
+[output_format_description]
+Returns: [output_format.type]
+
+Constraints:
+[constraints]
+
+Examples:
+[test_cases]
+
+Generate a solution in this format:
+{
+  "thoughts": [
+    "First thought about understanding the task",
+    "Second thought about approach to solve it",
+    "Third thought about implementation details"
+  ],
+  "code": "The solution with comments explaining the code",
+  "time_complexity": "The time complexity in form O(_) because _",
+  "space_complexity": "The space complexity in form O(_) because _"
+}`,
+          followUpPrompt: `Review the code solution and provide improvements.
+
+First extract and analyze what's shown in the image. Then create an improved version while maintaining the same general approach and structure.
+
+Return your response in this JSON format:
+{
+  "thoughts": [
+    "First thought about the task and current solution",
+    "Second thought about possible improvements",
+    "Third thought about the final solution"
+  ],
+  "old_code": "The exact code from the image",
+  "new_code": "The improved code with inline comments on changed lines",
+  "time_complexity": "O(_) because _",
+  "space_complexity": "O(_) because _"
+}`
+        },
+        meeting_notes: {
+          name: "Meeting Notes",
+          initialPrompt: `Analyze the image of meeting notes or slides and extract all relevant information.
+
+Please identify:
+1. The main topics or agenda items
+2. Key points discussed for each topic
+3. Any action items or decisions made
+4. Participants mentioned (if any)
+5. Dates, deadlines, or timelines mentioned
+
+Organize the information in a clear, structured format.`,
+
+          followUpPrompt: `Review the meeting notes again and provide additional insights or clarifications.
+
+Based on the image and the previous extraction, please:
+1. Identify any information that might have been missed
+2. Clarify any ambiguous points
+3. Suggest potential follow-up questions or actions
+4. Highlight the most important takeaways
+5. Organize the information in a more structured way if needed
+
+Present your analysis in a clear, professional format.`
+        }
+      };
+      
+      store.set('promptTemplates', templates);
+      
+      // Set the first template as active
+      const firstTemplateKey = Object.keys(templates)[0];
+      store.set('activeTemplate', firstTemplateKey);
+      
+      return {
+        success: true,
+        templates: templates,
+        activeTemplate: firstTemplateKey
+      };
+    } catch (error) {
+      console.error('Error resetting prompt templates:', error);
+      return {
+        success: false,
+        error: 'Failed to reset prompt templates'
+      };
+    }
+  });
 }

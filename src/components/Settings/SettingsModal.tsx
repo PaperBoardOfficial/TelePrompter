@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import PromptTemplates from './PromptTemplates';
 
 interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
     transparency?: number;
+    initialTab?: 'api' | 'prompts';
 }
 
-const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, transparency = 80 }) => {
+const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, transparency = 80, initialTab = 'api' }) => {
     const [apiKey, setApiKey] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState({ text: '', type: '' });
+    const [activeTab, setActiveTab] = useState(initialTab);
 
     useEffect(() => {
         if (isOpen) {
@@ -71,7 +74,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, transpar
                 style={getBackgroundStyle(0.6)}
             >
                 <div className="flex justify-between items-center p-4 border-b border-white/10">
-                    <h2 className="text-lg font-medium text-white">API Settings</h2>
+                    <h2 className="text-lg font-medium text-white">Settings</h2>
                     <button
                         onClick={onClose}
                         className="text-gray-400 hover:text-white transition-colors"
@@ -80,48 +83,77 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, transpar
                     </button>
                 </div>
 
-                <div className="p-4 space-y-4">
-                    <div className="space-y-2">
-                        <label htmlFor="apiKey" className="block text-sm font-medium text-gray-300">
-                            Gemini API Key
-                        </label>
-                        <input
-                            type="password"
-                            id="apiKey"
-                            value={apiKey}
-                            onChange={(e) => setApiKey(e.target.value)}
-                            className="w-full px-3 py-2 border border-white/10 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            style={getBackgroundStyle(0.4)}
-                            placeholder="Enter your Gemini API key"
-                        />
-                        <p className="text-xs text-gray-400">
-                            Your API key is stored securely on your device and is never sent to our servers.
-                        </p>
+                <div className="border-b border-white/10">
+                    <div className="flex">
+                        <button
+                            className={`px-4 py-2 text-sm font-medium ${activeTab === 'api'
+                                ? 'text-white border-b-2 border-blue-500'
+                                : 'text-gray-400 hover:text-white'
+                                }`}
+                            onClick={() => setActiveTab('api')}
+                        >
+                            API Settings
+                        </button>
+                        <button
+                            className={`px-4 py-2 text-sm font-medium ${activeTab === 'prompts'
+                                ? 'text-white border-b-2 border-blue-500'
+                                : 'text-gray-400 hover:text-white'
+                                }`}
+                            onClick={() => setActiveTab('prompts')}
+                        >
+                            Prompt Templates
+                        </button>
                     </div>
+                </div>
 
-                    {message.text && (
-                        <div className={`text-sm ${message.type === 'error' ? 'text-red-400' : 'text-green-400'}`}>
-                            {message.text}
+                {activeTab === 'api' ? (
+                    <div className="p-4 space-y-4">
+                        <div className="space-y-2">
+                            <label htmlFor="apiKey" className="block text-sm font-medium text-gray-300">
+                                Gemini API Key
+                            </label>
+                            <input
+                                type="password"
+                                id="apiKey"
+                                value={apiKey}
+                                onChange={(e) => setApiKey(e.target.value)}
+                                className="w-full px-3 py-2 border border-white/10 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                style={getBackgroundStyle(0.4)}
+                                placeholder="Enter your Gemini API key"
+                            />
+                            <p className="text-xs text-gray-400">
+                                Your API key is stored securely on your device and is never sent to our servers.
+                            </p>
                         </div>
-                    )}
-                </div>
 
-                <div className="flex justify-end gap-3 p-4 border-t border-white/10">
-                    <button
-                        onClick={onClose}
-                        className="px-4 py-2 text-sm font-medium text-white border border-white/10 rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
-                        style={getBackgroundStyle(0.4)}
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={saveSettings}
-                        disabled={isSaving}
-                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600/80 rounded-md hover:bg-blue-500/80 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {isSaving ? 'Saving...' : 'Save'}
-                    </button>
-                </div>
+                        {message.text && (
+                            <div className={`text-sm ${message.type === 'error' ? 'text-red-400' : 'text-green-400'}`}>
+                                {message.text}
+                            </div>
+                        )}
+
+                        <div className="flex justify-end gap-3 pt-4">
+                            <button
+                                onClick={onClose}
+                                className="px-4 py-2 text-sm font-medium text-white border border-white/10 rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+                                style={getBackgroundStyle(0.4)}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={saveSettings}
+                                disabled={isSaving}
+                                className="px-4 py-2 text-sm font-medium text-white bg-blue-600/80 rounded-md hover:bg-blue-500/80 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isSaving ? 'Saving...' : 'Save'}
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="p-4 max-h-[70vh] overflow-y-auto">
+                        <PromptTemplates />
+                    </div>
+                )}
             </div>
         </div>
     );

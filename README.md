@@ -1,26 +1,61 @@
-# Interview Coder
+# TelePrompter
 
-Interview Coder is a desktop application designed to help users with technical coding interviews. It allows users to take screenshots of coding problems, process them using AI, and get solutions.
-
+TelePrompter is a powerful desktop assistant that helps you analyze code problems, improve solutions, and extract information from your screen without leaving your current context.
 
 ## Features
 
-- Take screenshots of coding problems
-- Process screenshots to extract problem statements
-- Generate solutions in your preferred programming language
-- View time and space complexity analysis
-- Toggle window visibility with keyboard shortcuts
-- Move the window around the screen with keyboard shortcuts
+- **Instant Screen Analysis**: Capture any part of your screen and get AI-powered analysis
+- **Code Problem Solving**: Automatically detects programming language and provides optimized solutions
+- **Meeting Note Extraction**: Capture meeting slides and get structured notes
+- **Customizable Prompts**: Create and edit templates for different use cases
+- **Transparent Overlay**: Adjustable transparency to see your work while using the app
+- **Keyboard Shortcuts**: Quick access to all features without disrupting your workflow
+
+## Use Cases
+
+- **Technical Interviews**: Get help during coding interviews without switching contexts
+- **Remote Meetings**: Extract key information from shared screens
+- **Code Reviews**: Quickly analyze and improve code snippets
+- **Learning**: Understand complex code examples with detailed explanations
+- **Productivity**: Save time by getting instant analysis of visual information
+
+## Getting Started
+
+1. **Install TelePrompter**: Download the latest version for your platform
+2. **Add Your API Key**: Enter your Gemini API key in Settings
+3. **Capture Screenshots**: Use the keyboard shortcut or button to capture your screen
+4. **Get Analysis**: TelePrompter will automatically analyze the content
 
 ## Keyboard Shortcuts
 
-- **Cmd/Ctrl + B**: Toggle window visibility
-- **Cmd/Ctrl + Q**: Quit the application
-- **Cmd/Ctrl + H**: Take a screenshot
-- **Cmd/Ctrl + Enter**: Process screenshots
-- **Arrow keys with Cmd/Ctrl**: Move window around the screen
+- **Toggle Window Visibility**: `Cmd/Ctrl + B`
+- **Take Screenshot**: `Cmd/Ctrl + H`
+- **Process Screenshots**: `Cmd/Ctrl + Enter`
+- **Quit Application**: `Cmd/Ctrl + Q`
+- **Move Window**: Arrow keys with `Cmd/Ctrl`
 
-## Running the Application
+## Configuration
+
+### API Key
+
+TelePrompter uses Google's Gemini API. You'll need to:
+1. Get an API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Enter it in the Settings panel (accessible from the menu)
+
+### Prompt Templates
+
+Customize how TelePrompter analyzes content:
+1. Open Settings and go to the "Prompts" tab
+2. Choose between built-in templates (Coding Task, Meeting Notes) or create your own
+3. Set your preferred template as active
+
+## Privacy
+
+- All processing happens through the Gemini API
+- Your API key is stored securely on your machine
+- Screenshots are saved temporarily and can be deleted at any time
+
+## Development
 
 ### Prerequisites
 
@@ -31,8 +66,8 @@ Interview Coder is a desktop application designed to help users with technical c
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/interview-coder.git
-   cd interview-coder
+   git clone https://github.com/PaperBoardOfficial/teleprompter.git
+   cd teleprompter
    ```
 
 2. Install dependencies:
@@ -55,14 +90,6 @@ Interview Coder is a desktop application designed to help users with technical c
    # or
    yarn build
    ```
-
-## API Integration
-
-This version of the application still requires an API connection to process screenshots and generate solutions. You'll need to set up your own API service or modify the code to use a different solution generation method.
-
-## Disclaimer
-
-This modified version is for educational purposes only. The original Interview Coder application is a commercial product with subscription requirements.
 
 ## License
 

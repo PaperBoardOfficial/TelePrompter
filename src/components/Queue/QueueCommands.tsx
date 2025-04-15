@@ -1,28 +1,24 @@
 import React, { useState, useEffect, useRef } from "react"
 
 import { useToast } from "../../contexts/toast"
-import { LanguageSelector } from "../shared/LanguageSelector"
 import { COMMAND_KEY } from "../../utils/platform"
 import SettingsModal from '../Settings/SettingsModal'
 
 interface QueueCommandsProps {
   onTooltipVisibilityChange: (visible: boolean, height: number) => void
   screenshotCount?: number
-  currentLanguage: string
-  setLanguage: (language: string) => void
 }
 
 const QueueCommands: React.FC<QueueCommandsProps> = ({
   onTooltipVisibilityChange,
   screenshotCount = 0,
-  currentLanguage,
-  setLanguage
 }) => {
   const [isTooltipVisible, setIsTooltipVisible] = useState(false)
   const tooltipRef = useRef<HTMLDivElement>(null)
   const { showToast } = useToast()
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [transparency, setTransparency] = useState(80) // Default 80% opacity (20% transparency)
+  const [settingsTab, setSettingsTab] = useState<'api' | 'prompts'>('api')
+  const [transparency, setTransparency] = useState(80)
 
   useEffect(() => {
     let tooltipHeight = 0
@@ -368,16 +364,19 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
                         </p>
                       </div>
 
-                      {/* API Settings Option */}
+                      {/* Settings Option */}
                       <div
                         className="cursor-pointer rounded px-2 py-1.5 hover:bg-white/10 transition-colors"
-                        onClick={() => setIsSettingsOpen(true)}
+                        onClick={() => {
+                          setSettingsTab('api');
+                          setIsSettingsOpen(true);
+                        }}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="truncate">API Settings</span>
+                          <span className="truncate">Settings</span>
                         </div>
                         <p className="text-[10px] leading-relaxed text-white/70 truncate mt-1">
-                          Configure your Gemini API key.
+                          Configure API key, prompt templates, and other settings.
                         </p>
                       </div>
 
@@ -401,14 +400,6 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
                         </p>
                       </div>
                     </div>
-
-                    {/* Language Selector only */}
-                    <div className="pt-3 mt-3 border-t border-white/10">
-                      <LanguageSelector
-                        currentLanguage={currentLanguage}
-                        setLanguage={setLanguage}
-                      />
-                    </div>
                   </div>
                 </div>
               </div>
@@ -421,7 +412,8 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
-        transparency={transparency} // Pass transparency to the modal
+        transparency={transparency}
+        initialTab={settingsTab}
       />
     </div>
   )

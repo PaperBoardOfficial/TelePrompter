@@ -49,6 +49,25 @@ interface ElectronAPI {
   quitApp: () => Promise<void>
   getTransparency: () => Promise<{ success: boolean; transparency?: number }>
   setTransparency: (value: number) => Promise<void>
+  getPromptTemplates: () => Promise<{
+    success: boolean;
+    templates?: any;
+    activeTemplate?: string;
+    error?: string;
+  }>
+  savePromptTemplates: (data: {
+    templates: any;
+    activeTemplate: string;
+  }) => Promise<{
+    success: boolean;
+    error?: string;
+  }>
+  resetPromptTemplates: () => Promise<{
+    success: boolean;
+    templates?: any;
+    activeTemplate?: string;
+    error?: string;
+  }>
 }
 
 export const PROCESSING_EVENTS = {
@@ -212,6 +231,9 @@ const electronAPI = {
   quitApp: () => ipcRenderer.invoke("quit-app"),
   getTransparency: () => ipcRenderer.invoke("get-transparency"),
   setTransparency: (value: number) => ipcRenderer.invoke("set-transparency", value),
+  getPromptTemplates: () => ipcRenderer.invoke('get-prompt-templates'),
+  savePromptTemplates: (data) => ipcRenderer.invoke('save-prompt-templates', data),
+  resetPromptTemplates: () => ipcRenderer.invoke('reset-prompt-templates'),
 } as ElectronAPI
 
 // Before exposing the API

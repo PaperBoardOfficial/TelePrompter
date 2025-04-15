@@ -51,6 +51,27 @@ export interface ElectronAPI {
   quitApp: () => Promise<{ success: boolean; error?: string }>
   getTransparency: () => Promise<{ success: boolean; transparency?: number; error?: string }>
   setTransparency: (value: number) => Promise<{ success: boolean; error?: string }>
+  getPromptTemplates: () => Promise<{
+    success: boolean;
+    templates?: any;
+    activeTemplate?: string;
+    error?: string;
+  }>;
+
+  savePromptTemplates: (data: {
+    templates: any;
+    activeTemplate: string;
+  }) => Promise<{
+    success: boolean;
+    error?: string;
+  }>;
+
+  resetPromptTemplates: () => Promise<{
+    success: boolean;
+    templates?: any;
+    activeTemplate?: string;
+    error?: string;
+  }>;
 }
 
 declare global {

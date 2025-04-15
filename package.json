@@ -1,5 +1,5 @@
 {
-  "name": "interview-coder-v1",
+  "name": "teleprompter",
   "version": "1.0.18",
   "main": "dist-electron/main.js",
   "scripts": {
@@ -9,8 +9,8 @@
     "build": "cross-env NODE_ENV=production rimraf dist dist-electron && vite build && tsc -p tsconfig.electron.json && electron-builder"
   },
   "build": {
-    "appId": "com.chunginlee.interviewcoder",
-    "productName": "Interview Coder",
+    "appId": "com.paperboardofficial.teleprompter",
+    "productName": "TelePrompter",
     "files": [
       "dist/**/*",
       "dist-electron/**/*",
@@ -42,7 +42,7 @@
           ]
         }
       ],
-      "artifactName": "Interview-Coder-${arch}.${ext}",
+      "artifactName": "TelePrompter-${arch}.${ext}",
       "icon": "assets/icons/mac/icon.icns",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
@@ -51,9 +51,9 @@
       "identity": "Developer ID Application",
       "notarize": true,
       "protocols": {
-        "name": "interview-coder-protocol",
+        "name": "teleprompter-protocol",
         "schemes": [
-          "interview-coder"
+          "teleprompter"
         ]
       }
     },
@@ -64,9 +64,9 @@
       "icon": "assets/icons/win/icon.ico",
       "artifactName": "${productName}-Windows-${version}.${ext}",
       "protocols": {
-        "name": "interview-coder-protocol",
+        "name": "teleprompter-protocol",
         "schemes": [
-          "interview-coder"
+          "teleprompter"
         ]
       }
     },
@@ -77,17 +77,17 @@
       "icon": "assets/icons/png/icon-256x256.png",
       "artifactName": "${productName}-Linux-${version}.${ext}",
       "protocols": {
-        "name": "interview-coder-protocol",
+        "name": "teleprompter-protocol",
         "schemes": [
-          "interview-coder"
+          "teleprompter"
         ]
       }
     },
     "publish": [
       {
         "provider": "github",
-        "owner": "ibttf",
-        "repo": "interview-coder",
+        "owner": "paperboardofficial",
+        "repo": "teleprompter",
         "private": false,
         "releaseType": "release"
       }
@@ -108,7 +108,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "An invisible desktop application to help you pass your technical interviews.",
+  "description": "An invisible desktop application to help you.",
   "dependencies": {
     "@electron/notarize": "^2.3.0",
     "@emotion/react": "^11.11.0",

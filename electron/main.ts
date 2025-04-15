@@ -1,11 +1,9 @@
 import { app, BrowserWindow, screen, shell } from "electron"
 import path from "path"
-import { initializeIpcHandlers } from "./ipcHandlers"
-import { ProcessingHelper } from "./ProcessingHelper"
-import { ScreenshotHelper } from "./ScreenshotHelper"
+import { initializeIpcHandlers } from "./ipcHandler"
+import { ProcessingHelper } from "./processingHelper"
+import { ScreenshotHelper } from "./screenshotHelper"
 import { ShortcutsHelper } from "./shortcuts"
-import { initAutoUpdater } from "./autoUpdater"
-import * as dotenv from "dotenv"
 import { store } from './store'
 
 // Constants
@@ -397,23 +395,9 @@ function setWindowDimensions(width: number, height: number): void {
   }
 }
 
-// Environment setup
-function loadEnvVariables() {
-  try {
-    dotenv.config()
-    console.log("Environment variables loaded:", {
-      NODE_ENV: process.env.NODE_ENV,
-      OPEN_AI_API_KEY: process.env.OPEN_AI_API_KEY ? "exists" : "missing"
-    })
-  } catch (error) {
-    console.error("Error loading environment variables:", error)
-  }
-}
-
 // Initialize application
 async function initializeApp() {
   try {
-    loadEnvVariables()
     initializeHelpers()
     initializeIpcHandlers({
       getMainWindow,
@@ -446,14 +430,6 @@ async function initializeApp() {
     })
     await createWindow()
     state.shortcutsHelper?.registerGlobalShortcuts()
-
-    // Initialize auto-updater regardless of environment
-    initAutoUpdater()
-    console.log(
-      "Auto-updater initialized in",
-      isDev ? "development" : "production",
-      "mode"
-    )
   } catch (error) {
     console.error("Failed to initialize application:", error)
     app.quit()
