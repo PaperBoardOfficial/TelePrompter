@@ -36,15 +36,8 @@ function App() {
     description: "",
     variant: "neutral" as const
   })
-  const [currentLanguage, setCurrentLanguage] = useState<string>("python")
   const [isInitialized, setIsInitialized] = useState(false)
 
-
-  // Helper function to safely update language
-  const updateLanguage = useCallback((newLanguage: string) => {
-    setCurrentLanguage(newLanguage)
-    window.__LANGUAGE__ = newLanguage
-  }, [])
 
   // Helper function to mark initialization complete
   const markInitialized = useCallback(() => {
@@ -72,9 +65,8 @@ function App() {
   // Initialize app with default values
   useEffect(() => {
     // Set default values
-    updateLanguage("python")
     markInitialized()
-  }, [updateLanguage, markInitialized])
+  }, [markInitialized])
 
   // Close toast after delay
   useEffect(() => {
@@ -92,10 +84,7 @@ function App() {
       <ToastContext.Provider value={{ showToast }}>
         <ToastProvider>
           <div className="min-h-screen bg-transparent">
-            <SubscribedApp
-              currentLanguage={currentLanguage}
-              setLanguage={updateLanguage}
-            />
+            <SubscribedApp />
             <Toast
               open={toastState.open}
               onOpenChange={(open) =>

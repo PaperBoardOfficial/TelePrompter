@@ -10,7 +10,6 @@ interface ImportMeta {
 
 // Extend the Window interface
 interface Window {
-  __LANGUAGE__: string
   __IS_INITIALIZED__: boolean
   electronAPI: {
     // Remove subscription portal

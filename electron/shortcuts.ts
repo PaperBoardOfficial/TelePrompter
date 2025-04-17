@@ -1,21 +1,29 @@
 import { globalShortcut, app } from "electron"
-import { IShortcutsHelperDeps } from "./main"
-
+import { WindowManager } from "./WindowManager"
+import { ScreenshotHelper } from "./screenshotHelper";
+import { AppState } from "./AppState";
+import { ProcessingHelper } from "./processingHelper";
 export class ShortcutsHelper {
-  private deps: IShortcutsHelperDeps
+  private windowManager: WindowManager;
+  private screenshotHelper: ScreenshotHelper;
+  private appState: AppState;
+  private processingHelper: ProcessingHelper;
 
-  constructor(deps: IShortcutsHelperDeps) {
-    this.deps = deps
+  constructor(windowManager: WindowManager, screenshotHelper: ScreenshotHelper, processingHelper: ProcessingHelper, appState: AppState) {
+    this.windowManager = windowManager;
+    this.screenshotHelper = screenshotHelper;
+    this.processingHelper = processingHelper;
+    this.appState = appState;
   }
 
   public registerGlobalShortcuts(): void {
     globalShortcut.register("CommandOrControl+H", async () => {
-      const mainWindow = this.deps.getMainWindow()
+      const mainWindow = this.windowManager.getMainWindow()
       if (mainWindow) {
         console.log("Taking screenshot...")
         try {
-          const screenshotPath = await this.deps.takeScreenshot()
-          const preview = await this.deps.getImagePreview(screenshotPath)
+          const screenshotPath = await this.screenshotHelper.takeScreenshot()
+          const preview = await this.screenshotHelper.getImagePreview(screenshotPath)
           mainWindow.webContents.send("screenshot-taken", {
             path: screenshotPath,
             preview
@@ -27,7 +35,7 @@ export class ShortcutsHelper {
     })
 
     globalShortcut.register("CommandOrControl+Enter", async () => {
-      await this.deps.processingHelper?.processScreenshots()
+      await this.processingHelper.processScreenshots()
     })
 
     globalShortcut.register("CommandOrControl+R", () => {
@@ -36,18 +44,17 @@ export class ShortcutsHelper {
       )
 
       // Cancel ongoing API requests
-      this.deps.processingHelper?.cancelOngoingRequests()
+      this.processingHelper.cancelOngoingRequests()
 
       // Clear both screenshot queues
-      this.deps.clearQueues()
+      this.screenshotHelper.clearQueues();
+      this.appState.setProblemInfo(null);
+      this.appState.setView("queue");
 
       console.log("Cleared queues.")
 
-      // Update the view state to 'queue'
-      this.deps.setView("queue")
-
       // Notify renderer process to switch view to 'queue'
-      const mainWindow = this.deps.getMainWindow()
+      const mainWindow = this.windowManager.getMainWindow()
       if (mainWindow && !mainWindow.isDestroyed()) {
         mainWindow.webContents.send("reset-view")
         mainWindow.webContents.send("reset")
@@ -57,26 +64,26 @@ export class ShortcutsHelper {
     // New shortcuts for moving the window
     globalShortcut.register("CommandOrControl+Left", () => {
       console.log("Command/Ctrl + Left pressed. Moving window left.")
-      this.deps.moveWindowLeft()
+      this.windowManager.moveLeft()
     })
 
     globalShortcut.register("CommandOrControl+Right", () => {
       console.log("Command/Ctrl + Right pressed. Moving window right.")
-      this.deps.moveWindowRight()
+      this.windowManager.moveRight()
     })
 
     globalShortcut.register("CommandOrControl+Down", () => {
       console.log("Command/Ctrl + down pressed. Moving window down.")
-      this.deps.moveWindowDown()
+      this.windowManager.moveDown()
     })
 
     globalShortcut.register("CommandOrControl+Up", () => {
       console.log("Command/Ctrl + Up pressed. Moving window Up.")
-      this.deps.moveWindowUp()
+      this.windowManager.moveUp()
     })
 
     globalShortcut.register("CommandOrControl+B", () => {
-      this.deps.toggleMainWindow()
+      this.windowManager.toggleWindow();
     })
 
     // Unregister shortcuts when quitting

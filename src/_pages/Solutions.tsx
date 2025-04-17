@@ -4,10 +4,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { dracula } from "react-syntax-highlighter/dist/esm/styles/prism"
 
-import ScreenshotQueue from "../components/Queue/ScreenshotQueue"
+import ScreenshotQueue from "../components/queue/ScreenshotQueue"
 
 import { ProblemStatementData } from "../types/solutions"
-import SolutionCommands from "../components/Solutions/SolutionCommands"
+import SolutionCommands from "../components/solutions/SolutionCommands"
 import Debug from "./Debug"
 import { useToast } from "../contexts/toast"
 import { COMMAND_KEY } from "../utils/platform"
@@ -41,13 +41,11 @@ export const ContentSection = ({
 const SolutionSection = ({
   title,
   content,
-  isLoading,
-  currentLanguage
+  isLoading
 }: {
   title: string
   content: React.ReactNode
   isLoading: boolean
-  currentLanguage: string
 }) => (
   <div className="space-y-2">
     <h2 className="text-[13px] font-medium text-white tracking-wide">
@@ -65,7 +63,6 @@ const SolutionSection = ({
       <div className="w-full">
         <SyntaxHighlighter
           showLineNumbers
-          language={currentLanguage == "golang" ? "go" : currentLanguage}
           style={dracula}
           customStyle={{
             maxWidth: "100%",
@@ -122,13 +119,9 @@ export const ComplexitySection = ({
 
 export interface SolutionsProps {
   setView: (view: "queue" | "solutions" | "debug") => void
-  currentLanguage: string
-  setLanguage: (language: string) => void
 }
 const Solutions: React.FC<SolutionsProps> = ({
   setView,
-  currentLanguage,
-  setLanguage
 }) => {
   const queryClient = useQueryClient()
   const contentRef = useRef<HTMLDivElement>(null)
@@ -421,8 +414,6 @@ const Solutions: React.FC<SolutionsProps> = ({
         <Debug
           isProcessing={debugProcessing}
           setIsProcessing={setDebugProcessing}
-          currentLanguage={currentLanguage}
-          setLanguage={setLanguage}
         />
       ) : (
         <div ref={contentRef} className="relative space-y-3 px-4 py-3">
@@ -446,8 +437,6 @@ const Solutions: React.FC<SolutionsProps> = ({
             onTooltipVisibilityChange={handleTooltipVisibilityChange}
             isProcessing={!problemStatementData || !solutionData}
             extraScreenshots={extraScreenshots}
-            currentLanguage={currentLanguage}
-            setLanguage={setLanguage}
           />
 
           {/* Main Content - Modified width constraints */}
@@ -499,7 +488,6 @@ const Solutions: React.FC<SolutionsProps> = ({
                       title="Solution"
                       content={solutionData}
                       isLoading={!solutionData}
-                      currentLanguage={currentLanguage}
                     />
 
                     <ComplexitySection

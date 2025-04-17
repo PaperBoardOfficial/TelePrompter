@@ -5,14 +5,8 @@ import Queue from "../_pages/Queue"
 import Solutions from "../_pages/Solutions"
 import { useToast } from "../contexts/toast"
 
-interface SubscribedAppProps {
-  currentLanguage: string
-  setLanguage: (language: string) => void
-}
 
-const SubscribedApp: React.FC<SubscribedAppProps> = ({
-  currentLanguage,
-  setLanguage
+const SubscribedApp: React.FC = ({
 }) => {
   const queryClient = useQueryClient()
   const [view, setView] = useState<"queue" | "solutions" | "debug">("queue")
@@ -127,14 +121,10 @@ const SubscribedApp: React.FC<SubscribedAppProps> = ({
       {view === "queue" ? (
         <Queue
           setView={setView}
-          currentLanguage={currentLanguage}
-          setLanguage={setLanguage}
         />
       ) : view === "solutions" ? (
         <Solutions
           setView={setView}
-          currentLanguage={currentLanguage}
-          setLanguage={setLanguage}
         />
       ) : null}
     </div>

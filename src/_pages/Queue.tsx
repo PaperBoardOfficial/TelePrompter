@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react"
 import { useQuery } from "@tanstack/react-query"
-import ScreenshotQueue from "../components/Queue/ScreenshotQueue"
-import QueueCommands from "../components/Queue/QueueCommands"
+import ScreenshotQueue from "../components/queue/ScreenshotQueue"
+import QueueCommands from "../components/queue/QueueCommands"
 
 import { useToast } from "../contexts/toast"
 import { Screenshot } from "../types/screenshots"
@@ -18,14 +18,10 @@ async function fetchScreenshots(): Promise<Screenshot[]> {
 
 interface QueueProps {
   setView: (view: "queue" | "solutions" | "debug") => void
-  currentLanguage: string
-  setLanguage: (language: string) => void
 }
 
 const Queue: React.FC<QueueProps> = ({
   setView,
-  currentLanguage,
-  setLanguage
 }) => {
   const { showToast } = useToast()
 
@@ -134,8 +130,6 @@ const Queue: React.FC<QueueProps> = ({
           <QueueCommands
             onTooltipVisibilityChange={handleTooltipVisibilityChange}
             screenshotCount={screenshots.length}
-            currentLanguage={currentLanguage}
-            setLanguage={setLanguage}
           />
         </div>
       </div>

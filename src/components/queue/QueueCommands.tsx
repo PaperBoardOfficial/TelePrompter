@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react"
 
 import { useToast } from "../../contexts/toast"
 import { COMMAND_KEY } from "../../utils/platform"
-import SettingsModal from '../Settings/SettingsModal'
+import SettingsModal from '../settings/SettingsModal'
 
 interface QueueCommandsProps {
   onTooltipVisibilityChange: (visible: boolean, height: number) => void

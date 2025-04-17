@@ -3,8 +3,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import React, { useEffect, useRef, useState } from "react"
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { dracula } from "react-syntax-highlighter/dist/esm/styles/prism"
-import ScreenshotQueue from "../components/Queue/ScreenshotQueue"
-import SolutionCommands from "../components/Solutions/SolutionCommands"
+import ScreenshotQueue from "../components/queue/ScreenshotQueue"
+import SolutionCommands from "../components/solutions/SolutionCommands"
 import { Screenshot } from "../types/screenshots"
 import { ComplexitySection, ContentSection } from "./Solutions"
 import { useToast } from "../contexts/toast"
@@ -13,12 +13,10 @@ const CodeSection = ({
   title,
   code,
   isLoading,
-  currentLanguage
 }: {
   title: string
   code: React.ReactNode
   isLoading: boolean
-  currentLanguage: string
 }) => (
   <div className="space-y-2">
     <h2 className="text-[13px] font-medium text-white tracking-wide"></h2>
@@ -34,7 +32,6 @@ const CodeSection = ({
       <div className="w-full">
         <SyntaxHighlighter
           showLineNumbers
-          language={currentLanguage == "golang" ? "go" : currentLanguage}
           style={dracula}
           customStyle={{
             maxWidth: "100%",
@@ -72,15 +69,11 @@ async function fetchScreenshots(): Promise<Screenshot[]> {
 interface DebugProps {
   isProcessing: boolean
   setIsProcessing: (isProcessing: boolean) => void
-  currentLanguage: string
-  setLanguage: (language: string) => void
 }
 
 const Debug: React.FC<DebugProps> = ({
   isProcessing,
   setIsProcessing,
-  currentLanguage,
-  setLanguage
 }) => {
   const [tooltipVisible, setTooltipVisible] = useState(false)
   const [tooltipHeight, setTooltipHeight] = useState(0)
@@ -216,8 +209,6 @@ const Debug: React.FC<DebugProps> = ({
         onTooltipVisibilityChange={handleTooltipVisibilityChange}
         isProcessing={isProcessing}
         extraScreenshots={screenshots}
-        currentLanguage={currentLanguage}
-        setLanguage={setLanguage}
       />
 
       {/* Main Content */}
@@ -249,7 +240,6 @@ const Debug: React.FC<DebugProps> = ({
               title="Solution"
               code={newCode}
               isLoading={!newCode}
-              currentLanguage={currentLanguage}
             />
 
             {/* Complexity Section */}

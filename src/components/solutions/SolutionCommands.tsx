@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react"
 import { useToast } from "../../contexts/toast"
 import { Screenshot } from "../../types/screenshots"
-import { LanguageSelector } from "../shared/LanguageSelector"
 import { COMMAND_KEY } from "../../utils/platform"
 
 export interface SolutionCommandsProps {
@@ -9,16 +8,12 @@ export interface SolutionCommandsProps {
   isProcessing: boolean
   screenshots?: Screenshot[]
   extraScreenshots?: Screenshot[]
-  currentLanguage: string
-  setLanguage: (language: string) => void
 }
 
 const SolutionCommands: React.FC<SolutionCommandsProps> = ({
   onTooltipVisibilityChange,
   isProcessing,
   extraScreenshots = [],
-  currentLanguage,
-  setLanguage
 }) => {
   const [isTooltipVisible, setIsTooltipVisible] = useState(false)
   const tooltipRef = useRef<HTMLDivElement>(null)
@@ -388,14 +383,6 @@ const SolutionCommands: React.FC<SolutionCommandsProps> = ({
                           Start fresh with a new question.
                         </p>
                       </div>
-                    </div>
-
-                    {/* Language Selector only */}
-                    <div className="pt-3 mt-3 border-t border-white/10">
-                      <LanguageSelector
-                        currentLanguage={currentLanguage}
-                        setLanguage={setLanguage}
-                      />
                     </div>
                   </div>
                 </div>
