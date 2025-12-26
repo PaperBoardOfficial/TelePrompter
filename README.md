@@ -39,12 +39,14 @@ TelePrompter is a powerful desktop assistant that helps you analyze code problem
 ### API Key
 
 TelePrompter uses Google's Gemini API. You'll need to:
+
 1. Get an API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
 2. Enter it in the Settings panel (accessible from the menu)
 
 ### Prompt Templates
 
 Customize how TelePrompter analyzes content:
+
 1. Open Settings and go to the "Prompts" tab
 2. Choose between built-in templates (Coding Task, Meeting Notes) or create your own
 3. Set your preferred template as active
@@ -59,38 +61,35 @@ Customize how TelePrompter analyzes content:
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
-- npm or yarn
+- Bun (v1.0 or higher)
 
 ### Installation
 
 1. Clone the repository:
+
    ```
    git clone https://github.com/PaperBoardOfficial/teleprompter.git
    cd teleprompter
    ```
 
 2. Install dependencies:
+
    ```
-   npm install
-   # or
-   yarn
+   bun install
    ```
 
 3. Run the application in development mode:
+
    ```
-   npm run dev
-   # or
-   yarn dev
+   bun run dev
    ```
 
 4. Build the application for production:
+
    ```
-   npm run build
-   # or
-   yarn build
+   bun run build
    ```
 
 ## License
 
-This project is licensed under the ISC License.
+This project is licensed under the MIT License.
